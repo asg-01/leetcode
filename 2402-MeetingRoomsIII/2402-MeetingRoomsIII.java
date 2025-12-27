@@ -1,42 +1,44 @@
-// Last updated: 12/27/2025, 12:16:54 PM
-1import java.util.*;
+// Last updated: 12/27/2025, 6:11:52 PM
+1
 2
 3class Solution {
 4    public int mostBooked(int n, int[][] meetings) {
-5        Arrays.sort(meetings, Comparator.comparingInt(a -> a[0]));
-6
-7        PriorityQueue<Integer> free = new PriorityQueue<>();
-8        for (int i = 0; i < n; ++i) free.offer(i);
-9
-10        PriorityQueue<long[]> busy =
-11            new PriorityQueue<>((a, b) -> a[0] == b[0] ? Long.compare(a[1], b[1])
-12                                                        : Long.compare(a[0], b[0]));
-13
-14        int[] cnt = new int[n];
-15
-16        for (int[] m : meetings) {
-17            long start = m[0], end = m[1];
-18
-19            while (!busy.isEmpty() && busy.peek()[0] <= start)
-20                free.offer((int) busy.poll()[1]);
-21
-22            int room;
-23            long newEnd;
-24            if (!free.isEmpty()) {
-25                room = free.poll();
-26                newEnd = end;
-27            } else {
-28                long[] e = busy.poll();
-29                room = (int) e[1];
-30                newEnd = e[0] + (end - start);
-31            }
-32            busy.offer(new long[] {newEnd, room});
-33            cnt[room]++;
-34        }
-35
-36        int best = 0;
-37        for (int i = 1; i < n; ++i)
-38            if (cnt[i] > cnt[best]) best = i;
-39        return best;
+5        int[] ans = new int[n];
+6        long[] times = new long[n];
+7        Arrays.sort(meetings, (a, b) -> Integer.compare(a[0], b[0]));
+8
+9        for (int i = 0; i < meetings.length; i++) {
+10            int start = meetings[i][0], end = meetings[i][1];
+11            boolean flag = false;
+12            int minind = -1;
+13            long val = Long.MAX_VALUE;
+14            for (int j = 0; j < n; j++) {
+15                if (times[j] < val) {
+16                    val = times[j];
+17                    minind = j;
+18                }
+19                if (times[j] <= start) {
+20                    flag = true;
+21                    ans[j]++;
+22                    times[j] = end;
+23                    break;
+24                }
+25            }
+26            if (!flag) {
+27                ans[minind]++;
+28                times[minind] += (end - start);
+29            }
+30        }
+31
+32        int maxi = -1, id = -1;
+33        for (int i = 0; i < n; i++) {
+34            if (ans[i] > maxi) {
+35                maxi = ans[i];
+36                id = i;
+37            }
+38        }
+39        return id;
 40    }
 41}
+42
+43
